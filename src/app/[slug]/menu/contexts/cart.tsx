@@ -3,8 +3,7 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 
 import { Product } from "../../../../../generated/prisma/client";
-
-interface CartProduct extends Pick<
+export interface CartProduct extends Pick<
   Product,
   "id" | "name" | "imageUrl" | "price"
 > {
