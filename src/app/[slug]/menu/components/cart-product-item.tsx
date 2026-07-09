@@ -4,13 +4,14 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/helpers/format-currency";
 
-import { CartProduct } from "../contexts/cart";
-
+import { CartProduct, useCartContext } from "../contexts/cart";
 interface CartItemProps {
   product: CartProduct;
 }
 
 const CartProductItem = ({ product }: CartItemProps) => {
+  const { decreaseProductQuantity, increaseProductQuantity } = useCartContext();
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -29,11 +30,19 @@ const CartProductItem = ({ product }: CartItemProps) => {
             {formatCurrency(product.price)}
           </p>
           <div className="flex items-center gap-1 text-center">
-            <Button variant="outline" className="h-7 w-7 rounded-xl">
+            <Button
+              variant="outline"
+              className="h-7 w-7 rounded-xl"
+              onClick={() => decreaseProductQuantity(product.id)}
+            >
               <ChevronLeftIcon size={14} />
             </Button>
-            <p className="w-4 text-sm">1</p>
-            <Button variant="outline" className="h-7 w-7 rounded-xl">
+            <p className="w-4 text-sm">{product.quantity}</p>
+            <Button
+              variant="outline"
+              className="h-7 w-7 rounded-xl"
+              onClick={() => increaseProductQuantity(product.id)}
+            >
               <ChevronRightIcon size={14} />
             </Button>
           </div>
