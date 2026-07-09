@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 
 import { Product } from "../../../../../generated/prisma/client";
 export interface CartProduct extends Pick<
@@ -13,6 +13,7 @@ export interface CartProduct extends Pick<
 export interface ICartContext {
   isOpen: boolean;
   products: CartProduct[];
+  total: number;
   toggleCart: () => void;
   addProduct: (product: CartProduct) => void;
   deleteProduct: (productId: string) => void;
@@ -23,6 +24,7 @@ export interface ICartContext {
 export const CartContext = createContext<ICartContext>({
   isOpen: false,
   products: [],
+  total: 0,
   toggleCart: () => {},
   addProduct: () => {},
   deleteProduct: () => {},
@@ -37,6 +39,12 @@ interface CartProviderProps {
 export const CartProvider = ({ children }: CartProviderProps) => {
   const [products, setProducts] = useState<CartProduct[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  const total = useMemo(() => {
+    return products.reduce((acc, product) => {
+      return acc + product.price * product.quantity;
+    }, 0);
+  }, [products]);
 
   const toggleCart = () => {
     setIsOpen((prev) => !prev);
@@ -104,6 +112,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       value={{
         isOpen,
         products,
+        total,
         toggleCart,
         addProduct,
         decreaseProductQuantity,
