@@ -14,6 +14,7 @@ export interface ICartContext {
   isOpen: boolean;
   products: CartProduct[];
   total: number;
+  totalQuantity: number;
   toggleCart: () => void;
   addProduct: (product: CartProduct) => void;
   deleteProduct: (productId: string) => void;
@@ -25,6 +26,7 @@ export const CartContext = createContext<ICartContext>({
   isOpen: false,
   products: [],
   total: 0,
+  totalQuantity: 0,
   toggleCart: () => {},
   addProduct: () => {},
   deleteProduct: () => {},
@@ -44,6 +46,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     return products.reduce((acc, product) => {
       return acc + product.price * product.quantity;
     }, 0);
+  }, [products]);
+
+  const totalQuantity = useMemo(() => {
+    return products.reduce((acc, product) => acc + product.quantity, 0);
   }, [products]);
 
   const toggleCart = () => {
@@ -113,6 +119,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         isOpen,
         products,
         total,
+        totalQuantity,
         toggleCart,
         addProduct,
         decreaseProductQuantity,

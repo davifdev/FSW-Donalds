@@ -27,7 +27,7 @@ const CartSheet = () => {
           <SheetDescription></SheetDescription>
         </SheetHeader>
         <div className="flex h-full flex-col space-y-4 py-5">
-          <div className="flex-auto">
+          <div className="flex-auto space-y-4">
             {products.map((product) => (
               <CartProductItem product={product} key={product.id} />
             ))}
