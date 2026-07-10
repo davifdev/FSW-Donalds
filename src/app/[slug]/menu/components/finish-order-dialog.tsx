@@ -1,8 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2Icon } from "lucide-react";
+import { useParams, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +29,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
+import { ConsumptionMehtod } from "../../../../../generated/prisma/client";
+import { createOrder } from "../actions/create-order";
+import { useCartContext } from "../contexts/cart";
 import { isValidCpf } from "../helpers/cpf";
 
 const formSchema = z.object({
@@ -39,13 +46,16 @@ const formSchema = z.object({
 });
 
 type FormSchema = z.infer<typeof formSchema>;
-
 interface FinishOrderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
+  const { slug } = useParams<{ slug: string }>();
+  const { products } = useCartContext();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,8 +65,26 @@ const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
     shouldUnregister: true,
   });
 
-  const onSubmit = (data: FormSchema) => {
-    console.log(data);
+  const onSubmit = async (data: FormSchema) => {
+    try {
+      const consumptionMethod = searchParams.get(
+        "consumption_method"
+      ) as ConsumptionMehtod;
+      startTransition(async () => {
+        await createOrder({
+          customerName: data.name,
+          customerCpf: data.cpf,
+          consumptionMethod,
+          products,
+          slug,
+        });
+
+        onOpenChange(false);
+        toast.success("Pedido finalizado com sucesso!");
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -79,7 +107,11 @@ const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
                   <FormItem>
                     <FormLabel>Nome</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Digite seu nome" />
+                      <Input
+                        {...field}
+                        placeholder="Digite seu nome"
+                        disabled={isPending}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -97,6 +129,7 @@ const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
                     <FormLabel>CPF</FormLabel>
                     <FormControl>
                       <PatternFormat
+                        disabled={isPending}
                         placeholder="Digite seu CPF"
                         format="###.###.###-##"
                         customInput={Input}
@@ -108,13 +141,20 @@ const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
                 )}
               />
               <DrawerFooter>
-                <Button type="submit" className="rounded-full">
-                  Finalizar
+                <Button
+                  type="submit"
+                  className="rounded-full text-white"
+                  variant="destructive"
+                  disabled={isPending}
+                >
+                  {isPending ? "Finalizando..." : "Finalizar"}
+                  {isPending && <Loader2Icon className="animate-spin" />}
                 </Button>
                 <DrawerClose asChild>
                   <Button
-                    variant="destructive"
-                    className="rounded-full text-white"
+                    variant="outline"
+                    className="rounded-full"
+                    disabled={isPending}
                   >
                     Cancelar
                   </Button>
