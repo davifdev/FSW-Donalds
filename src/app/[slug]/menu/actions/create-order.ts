@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { db } from "@/lib/prisma";
 
 import { ConsumptionMehtod } from "../../../../../generated/prisma/client";
@@ -59,4 +61,6 @@ export const createOrder = async (input: CreateOrderInput) => {
       ),
     },
   });
+
+  redirect(`/${input.slug}/orders`);
 };

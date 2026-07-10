@@ -117,10 +117,6 @@ const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
                   </FormItem>
                 )}
               />
-            </form>
-          </Form>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
               <FormField
                 control={form.control}
                 name="cpf"
