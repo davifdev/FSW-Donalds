@@ -2,7 +2,7 @@
 
 import { ChevronLeftIcon, ScrollTextIcon } from "lucide-react";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,16 +40,11 @@ const getStatusLabel = (status: OrderStatus) => {
 
 const OrderList = ({ orders }: OrderListProps) => {
   const router = useRouter();
-  const { slug } = useParams<{ slug: string }>();
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => router.push(`/${slug}`)}
-        >
+        <Button variant="outline" size="icon" onClick={() => router.back()}>
           <ChevronLeftIcon />
         </Button>
       </div>
