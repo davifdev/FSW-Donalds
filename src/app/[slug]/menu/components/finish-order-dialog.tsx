@@ -1,12 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loadStripe } from "@stripe/stripe-js";
 import { Loader2Icon } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 
 import { ConsumptionMehtod } from "../../../../../generated/prisma/client";
 import { createOrder } from "../actions/create-order";
+import { createStripeCheckout } from "../actions/create-stripe-checkout";
 import { useCartContext } from "../contexts/cart";
 import { isValidCpf } from "../helpers/cpf";
 
@@ -71,7 +72,7 @@ const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
         "consumption_method"
       ) as ConsumptionMehtod;
       startTransition(async () => {
-        await createOrder({
+        const order = await createOrder({
           customerName: data.name,
           customerCpf: data.cpf,
           consumptionMethod,
@@ -79,8 +80,23 @@ const FinishOrderDialog = ({ open, onOpenChange }: FinishOrderDialogProps) => {
           slug,
         });
 
-        onOpenChange(false);
-        toast.success("Pedido finalizado com sucesso!");
+        const { sessionId } = await createStripeCheckout({
+          products,
+          orderId: order.id,
+          cpf: data.cpf,
+
+          slug,
+        });
+
+        if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
+          throw new Error("Missing Stripe public key");
+        }
+
+        const stripe = await loadStripe(
+          process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY
+        );
+
+        await stripe?.redirectToCheckout({ sessionId });
       });
     } catch (error) {
       console.error(error);

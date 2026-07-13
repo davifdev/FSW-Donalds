@@ -35,6 +35,17 @@ const getStatusLabel = (status: OrderStatus) => {
   if (status === "FINISHED") return "Finalizado";
   if (status === "IN_PREPARATION") return "Em preparo";
   if (status === "PENDING") return "Pendente";
+  if (status === "PAYMENT_CONFIRMED") return "Pagamento confirmado";
+  if (status === "PAYMENT_FAILED") return "Pagamento falhou";
+  return "";
+};
+
+const getLabelColor = (status: OrderStatus) => {
+  if (status === "PAYMENT_CONFIRMED") return "bg-green-500 text-white";
+  if (status === "PAYMENT_FAILED") return "bg-red-500 text-white";
+  if (status === "PENDING") return "bg-amber-500 text-white";
+  if (status === "FINISHED") return "bg-gray-200 text-gray-500";
+  if (status === "IN_PREPARATION") return "bg-blue-500 text-white";
   return "";
 };
 
@@ -56,7 +67,7 @@ const OrderList = ({ orders }: OrderListProps) => {
         <Card key={order.id}>
           <CardContent className="space-y-4 p-5">
             <div
-              className={`w-fit rounded-full px-2 py-1 text-xs font-semibold ${order.status === OrderStatus.FINISHED ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}
+              className={`w-fit rounded-full px-2 py-1 text-xs font-semibold ${getLabelColor(order.status)}`}
             >
               {getStatusLabel(order.status)}
             </div>
